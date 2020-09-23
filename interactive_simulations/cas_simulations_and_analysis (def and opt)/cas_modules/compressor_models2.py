@@ -46,26 +46,10 @@ between its maximum power output and 0% of its maximum power output.
 #create Compressor class object
 class Compressor():
     def __init__(self, maximum_power, minimum_power, maximum_flow, minimum_flow):
-        self._maximum_power = maximum_power #maximum power attribute
-        self._minimum_power = minimum_power #minimum power attribute
-        self._maximum_flow = maximum_flow #maximum power attribute
-        self._minimum_flow = minimum_flow #maximum power attribute
-
-        @property
-        def maximum_power(self):
-        	return self._maximum_power
-
-        @property
-        def minimum_power(self):
-        	return self._minimum_power
-
-        @property
-        def maximum_flow(self):
-        	return self._maximum_flow
-
-        @property
-        def minimum_flow(self):
-        	return self._minimum_flow
+        self.maximum_power = maximum_power #maximum power attribute
+        self.minimum_power = minimum_power #minimum power attribute
+        self.maximum_flow = maximum_flow #maximum power attribute
+        self.minimum_flow = minimum_flow #maximum power attribute
 
 #create FixedControl subclass
 class FixedControl(Compressor): #two-states of control
