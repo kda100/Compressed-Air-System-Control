@@ -227,10 +227,10 @@ class SimulationUserInputsInterface():
         compressors_label = tk.Label(self._compressor_inputs_frame, text="Compressors", font=("Helvetica", 10))
         compressors_label.grid(row=0, column=0, pady=10, padx=10, sticky=tk.N) #creates column title for compressors
         
-        maximum_power_label = tk.Label(self._compressor_inputs_frame, text="Maximum Power", font=("Helvetica", 10))
+        maximum_power_label = tk.Label(self._compressor_inputs_frame, text="Maximum Power (kW)", font=("Helvetica", 10))
         maximum_power_label.grid(row=0, column=1, pady=10, padx=10, sticky=tk.N) #creates column titles for max power of compressors
         
-        maximum_air_flow_label = tk.Label(self._compressor_inputs_frame, text="Maximum Air Flow", font=("Helvetica", 10))
+        maximum_air_flow_label = tk.Label(self._compressor_inputs_frame, text="Maximum Air Flow (m3/hr)", font=("Helvetica", 10))
         maximum_air_flow_label.grid(row=0, column=2, pady=10, padx=10, sticky=tk.N) #creates column titles for max air flow of compressors
         
         operation_mode_label = tk.Label(self._compressor_inputs_frame, text="Operation Mode", font=("Helvetica", 10))

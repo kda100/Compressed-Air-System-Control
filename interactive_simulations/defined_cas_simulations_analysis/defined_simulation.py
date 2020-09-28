@@ -56,8 +56,8 @@ C4 = csf.GetCompressor1(4, 177, 1326) #asks user for compressor 4, maximum_power
 C5 = csf.GetCompressor1(5, 364, 2604) #asks user for compressor 5, maximum_power = 364 kW, maximum_flow = 2604
 C6 = csf.GetCompressor1(6, 274, 1902) #asks user for compressor 6, maximum_power = 274 kW, maximum_flow = 1902
 
-compressor_dict = {'C1':C1, 'C2':C2, 'C3':C3, 'C4':C4, 'C5':C5, 'C6':C6} #dictionary to store compressor objects using string names for compressors.
-trim = csf.get_trim(compressor_dict) #asks user for trim compressor.
+compressors_dict = {'C1':C1, 'C2':C2, 'C3':C3, 'C4':C4, 'C5':C5, 'C6':C6} #dictionary to store compressor objects using string names for compressors.
+trim = csf.get_trim(compressors_dict) #asks user for trim compressor.
 
 C1_power_output = [] #list object to store power output for compressor C1
 C1_air_output = [] #list object to store air output for compressor C1
@@ -72,41 +72,43 @@ C5_air_output = [] #list object to store air output for compressor C5
 C6_power_output = [] #list object to store power output for compressor C6
 C6_air_output = [] #list object to store air output for compressor C6
 
-compressor_power_dict = {'C1':['C1_power_output', C1_power_output], 'C2':['C2_power_output', C2_power_output],
+compressors_power_dict = {'C1':['C1_power_output', C1_power_output], 'C2':['C2_power_output', C2_power_output],
                          'C3':['C3_power_output', C3_power_output], 'C4':['C4_power_output', C4_power_output],
                          'C5':['C5_power_output', C5_power_output], 'C6':['C6_power_output', C6_power_output]} #dictionary to store a list of string names for compressor power outputs and compressor power output list, using the compressor string name. 
 
-compressor_air_dict = {'C1':['C1_air_output', C1_air_output], 'C2':['C2_air_output', C2_air_output],
+compressors_air_dict = {'C1':['C1_air_output', C1_air_output], 'C2':['C2_air_output', C2_air_output],
                        'C3':['C3_air_output', C3_air_output], 'C4':['C4_air_output', C4_air_output],
                        'C5':['C5_air_output', C5_air_output], 'C6':['C6_air_output', C6_air_output]} #dictionary to store a list of string names for compressor air outputs and compressor air output list, using the compressor string name.
 
 print("Now asking for number of setpoints in control scheme")
 
 setpoints = [0] #list for storing the integer setpoints
-contri_compressors = [] #list to store compressor objects contributing to each setpoint
+contributing_compressors = [] #list to store compressor objects contributing to each setpoint
 boundaries = [] #list to store the integer boundaries for the air_demand values
 
 input_statement = 'How many setpoints in control scheme: '
-n = csf.get_setpoints(input_statement) #function to get number of setpoints
+num_of_setpoints = csf.get_setpoints(input_statement) #function to get number of setpoints
+
 
 print("\nNow asking what compressor(s) maximum capacities are contributing to the setpoints")
+
 num = 1
-while num<=n: #iterates over all the setpoints
+while num<=num_of_setpoints: #iterates over all the setpoints
     try:
-        contri = input(f"Which compressor(s) are contributing to setpoint {num} (s{num}): ") #asks user for the compressor(s) contributing to each setpoint in the control sequenc logic.
-        if contri == '0': #breaks from while loop if user types 0
+        contributing = input(f"Which compressor(s) are contributing to setpoint {num} (s{num}): ") #asks user for the compressor(s) contributing to each setpoint in the control sequenc logic.
+        if contributing == '0': #breaks from while loop if user types 0
             break
         lst_com = [] #list to store the contributing compressors for each setpoint
         setpoint = 0 #variable to store setpoint
-        contri = [x.strip() for x in contri.upper().split(',')] #splits the contri input based on commas separating strings e.g. C1, C2, C3 => ['C1', 'C2', 'C3']
-        for compressor in contri: 
+        contributing = [x.strip() for x in contributing.upper().split(',')] #splits the contri input based on commas separating strings e.g. C1, C2, C3 => ['C1', 'C2', 'C3']
+        for compressor in contributing: 
             if len(compressor)>2: #checks if each compressor in contri is a valid input length input
                 exit()
-            if len(contri) != len(set(contri)):
+            if len(contributing) != len(set(contributing)):
                 exit()
-        for compressor in contri:
-            lst_com.append(compressor_dict[compressor]) #checks if input is in compressor_dict and if it is adds to lst_com 
-        contri_compressors.append(lst_com) #add lst_com to contri_compressors
+        for compressor in contributing:
+            lst_com.append(compressors_dict[compressor]) #checks if input is in compressor_dict and if it is adds to lst_com 
+        contributing_compressors.append(lst_com) #add lst_com to contributing_compressors
         for compressor in lst_com:
             setpoint = setpoint + compressor.maximum_flow #add maximum flow of compressors in lst_com to setpoint
         setpoints.append(setpoint) #adds setpoint to setpoints list.
@@ -118,10 +120,10 @@ while num<=n: #iterates over all the setpoints
         num = num + 1
         continue
 
-if contri == '0': 
+if contributing == '0': 
     exit('Program has ended') #exits from entire program, if user types 0
-    
-contri_compressors = [x for _,x in sorted(zip(setpoints[1:], contri_compressors))] #sorts contri_compressors list based on setpoints list
+
+contributing_compressors = [x for _,x in sorted(zip(setpoints[1:], contributing_compressors))] #sorts contributing_compressors list based on setpoints list
             
 setpoints.sort() #sorts setpoints list
 
@@ -151,7 +153,7 @@ print('Performing Simulation...')
 for cell in air_volume_stacked[coordinate[0]]: #iterates over column with air_volume data in m3/hr
     if type(cell.value) == int or type(cell.value) == float: #checks if value in cell is an int or float
         air_demand = round(cell.value) #stores data as air demand
-        active_compressors = csf.get_active_compressors(boundaries, air_demand, setpoints, contri_compressors, trim) #returns a list of active compressors
+        active_compressors = csf.get_active_compressors(boundaries, air_demand, setpoints, contributing_compressors, trim) #returns a list of active compressors
         
         csf.update_power_output(C1, active_compressors, C1_power_output, air_demand) #appends result of C1.power_output to C1_power_output
         csf.update_power_output(C2, active_compressors, C2_power_output, air_demand) #appends result of C2.power_output to C2_power_output
@@ -180,17 +182,17 @@ power_output = csf.get_sheet(input_statement, results) #gets excel sheet object 
 input_statement = "What cell would you like compressor's power output saved: " 
 coor = csf.get_coordinate(input_statement, power_output) #gets excel coordinate object from sheet 
 
-for row in power_output.iter_rows(min_row = coor.row, max_row = coor.row, min_col = coor.col_idx, max_col = coor.col_idx + len(compressor_dict)-1): #iterates over row attribute with coordinate object 
+for row in power_output.iter_rows(min_row = coor.row, max_row = coor.row, min_col = coor.col_idx, max_col = coor.col_idx + len(compressors_dict)-1): #iterates over row attribute with coordinate object 
     comp = 1
     for cell in row:
-        cell = compressor_power_dict['C{}'.format(comp)][0] #writes each cell object columns with the names in first index of compressor_power_dict key values e.g C1_Power_Output, C2_Power_Output... 
+        cell = compressors_power_dict['C{}'.format(comp)][0] #writes each cell object columns with the names in first index of compressors_power_dict key values e.g C1_Power_Output, C2_Power_Output... 
         comp = comp + 1
 
 comp = 1
-for col in power_output.iter_cols(min_row = coor.row+1, max_row = coor.row + len(compressor_power_dict['C{}'.format(comp)][1]), min_col = coor.col_idx, max_col = coor.col_idx + len(compressor_dict)-1): #iterates over excel sheet object
+for col in power_output.iter_cols(min_row = coor.row+1, max_row = coor.row + len(compressors_power_dict['C{}'.format(comp)][1]), min_col = coor.col_idx, max_col = coor.col_idx + len(compressors_dict)-1): #iterates over excel sheet object
     i = 0
     for cell in col:
-        cell = compressor_power_dict['C{}'.format(comp)][1][i] #writes to each cell object the data contained in the second index of the compressor_power_dict key values e.g. C1_Power_Output list,C1_Power_Output list...
+        cell = compressors_power_dict['C{}'.format(comp)][1][i] #writes to each cell object the data contained in the second index of the compressors_power_dict key values e.g. C1_Power_Output list,C1_Power_Output list...
         i = i + 1
     comp = comp + 1
     
@@ -200,17 +202,17 @@ air_output = csf.get_sheet(input_statement, results) #gets excel sheet object fr
 input_statement = "What cell would you like compressor's air output saved: " 
 coor = csf.get_coordinate(input_statement, power_output) #gets excel coordinate object from sheet
 
-for row in air_output.iter_rows(min_row = coor.row, max_row = coor.row, min_col = coor.col_idx, max_col = coor.col_idx + len(compressor_dict)-1): #iterates over row attribute with coordinate object 
+for row in air_output.iter_rows(min_row = coor.row, max_row = coor.row, min_col = coor.col_idx, max_col = coor.col_idx + len(compressors_dict)-1): #iterates over row attribute with coordinate object 
     comp = 1
     for cell in row:
-        cell = compressor_air_dict['C{}'.format(comp)][0] #writes each cell object columns with the names in first index of compressor_power_dict key values e.g C1_Air_Output, C2_Air_Output... 
+        cell = compressors_air_dict['C{}'.format(comp)][0] #writes each cell object columns with the names in first index of compressors_power_dict key values e.g C1_Air_Output, C2_Air_Output... 
         comp + comp + 1
 
 comp = 1
-for col in air_output.iter_cols(min_row = coor.row+1, max_row = coor.row + len(compressor_air_dict['C{}'.format(comp)][1]), min_col = coor.col_idx, max_col = coor.col_idx + len(compressor_dict)-1): #iterates over excel sheet object
+for col in air_output.iter_cols(min_row = coor.row+1, max_row = coor.row + len(compressors_air_dict['C{}'.format(comp)][1]), min_col = coor.col_idx, max_col = coor.col_idx + len(compressors_dict)-1): #iterates over excel sheet object
     i = 0
     for cell in col:
-        cell = compressor_power_dict['C{}'.format(comp)][1][i] #writes to each cell object the data contained in the second index of the compressor_power_dict key values e.g. C1_Power_Output list,C1_Power_Output list...
+        cell = compressors_power_dict['C{}'.format(comp)][1][i] #writes to each cell object the data contained in the second index of the compressors_power_dict key values e.g. C1_Power_Output list,C1_Power_Output list...
         i = i + 1
     comp = comp + 1
 
